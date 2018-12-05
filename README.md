@@ -10,7 +10,6 @@ You can get information when a service added, updated etc. This service will aut
 
 ```json
 {
-index.js:129
   "nodes": [
     {
       "Id": "xvvpn493yqrvtove74o33o9sf",
