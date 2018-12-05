@@ -40,12 +40,16 @@ const app = http.createServer((request, response) => {
 
 const main = async () => {
     try {
+        let requestValue = {
+            nodes: [],
+            services: []
+        };
+
         const nodes = await docker.listNodes();
         let nnodes = {};
         nodes.map(x => {
             if (x.Status.State !== NODE_STATES.READY && x.Spec.Availability !== NODE_STATES.ACTIVE)
                 return;
-
             nnodes[x.ID] = {
                 Id: x.ID,
                 Name: x.Description.Hostname,
@@ -88,8 +92,8 @@ const main = async () => {
                 return;
             }
 
-            if (!nservices[x.ServiceID].Nodes.find(z => z.Id === node.Id)) {
-                nservices[x.ServiceID].Nodes.push(node);
+            if (nservices[x.ServiceID].Nodes.indexOf(node.Id) === -1) {
+                nservices[x.ServiceID].Nodes.push(node.Id);
             }
         });
 
@@ -99,9 +103,16 @@ const main = async () => {
             return;
         }
 
-        let value = JSON.stringify(nservices);
+        requestValue.nodes = Object.keys(nnodes).map(n => {
+            return nnodes[n];
+        });
+
+        requestValue.services = Object.keys(nservices).map(s => {
+            return nservices[s];
+        });
+
+        let value = JSON.stringify(requestValue);
         if (value !== latestValue || isAlways) {
-            value = JSON.stringify(nservices);
             console.log("Configuration will be updated.");
         } else {
             return;
@@ -115,7 +126,7 @@ const main = async () => {
         latestValue = value;
 
         if (isDebug) {
-            console.log(JSON.stringify(nservices, null, 2));
+            console.log(JSON.stringify(requestValue, null, 2));
         }
         console.log(`${Object.keys(nservices).length} services found.`);
         console.log(`Sending to service : ${serviceUrl}`);
