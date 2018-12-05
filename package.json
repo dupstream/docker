@@ -1,7 +1,7 @@
 {
   "name": "dynamic-upstream",
   "version": "1.0.0",
-  "description": "",
+  "description": "Send your docker swarm service list with containers, nodes, ports to preferred service.",
   "main": "index.js",
   "repository": {
     "type": "git",
