@@ -59,7 +59,7 @@ Your can use following environment variables;
 |MONO_SECRET|`null`|Use it and secure your endpoint. This will sent to your server with header "X-SECRET"|
 |MONO_PREIOD|`3`|Seconds - will check your services every 3 seconds.|
 
-and a command like `--always` (Which will help you to ignore caching and send always updated version of your services).
+and a command like `--always` (Which will help you to ignore caching and send always updated version of your services). Also `--debug` will show you the request body.
 
 So with this data, you can use it with template scripts and update your load balancer upstream (like nginx).
 
