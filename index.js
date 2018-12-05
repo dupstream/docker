@@ -137,7 +137,7 @@ const main = async () => {
             },
             json: true,
             method: 'POST',
-            body: value
+            body: requestValue
         }, function (error, response, body) {
             if (error != null) {
                 latestValue = null;
