@@ -115,6 +115,7 @@ const main = async () => {
         if (value !== latestValue || isAlways) {
             console.log("Configuration will be updated.");
         } else {
+            setTimeout(main, time);
             return;
         }
 
