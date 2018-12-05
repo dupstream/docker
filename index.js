@@ -143,10 +143,8 @@ const main = async () => {
                 latestValue = null;
                 console.log("Something is wrong.");
                 console.error(error);
-                return;
             } else if (response.statusCode === 200) {
                 console.log("Service informed");
-                return;
             } else {
                 console.log(`No success code from server. We will try again in ${seconds} seconds.`);
                 latestValue = null;
