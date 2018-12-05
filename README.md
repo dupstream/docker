@@ -1,4 +1,4 @@
-![](img/dupstream-logo.png)
+![](https://raw.githubusercontent.com/dupstream/docker/master/img/dupstream-logo-small-w.png)
 
 ## dupstream
 
