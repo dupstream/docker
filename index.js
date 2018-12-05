@@ -18,7 +18,7 @@ const NODE_STATES = {
 const isAlways = process.argv.indexOf("--always") !== -1;
 const isDebug = process.argv.indexOf("--debug") !== -1;
 
-const seconds = parseInt((process.env.MONO_PERIOD || 3));
+const seconds = parseInt((process.env.DUPSTREAM_PERIOD || 3));
 const time = seconds * 1000;
 
 if (isAlways) {
@@ -27,8 +27,8 @@ if (isAlways) {
     console.log(`Your service will be informed every ${seconds} when something is changed.`);
 }
 
-const serviceUrl = process.env.MONO_SERVICE;
-const secret = process.env.MONO_SECRET;
+const serviceUrl = process.env.DUPSTREAM_SERVICE_URL;
+const secret = process.env.DUPSTREAM_SERVICE_SECRET;
 
 const app = http.createServer((request, response) => {
     response.writeHead(200, {
@@ -99,7 +99,7 @@ const main = async () => {
 
 
         if (!serviceUrl) {
-            console.log("There is no service definition in environment variables. Please define it first. Variable Name: [MONO_SERVICE]");
+            console.log("There is no service definition in environment variables. Please define it first. Variable Name: [DUPSTREAM_SERVICE_URL]");
             return;
         }
 
@@ -119,7 +119,7 @@ const main = async () => {
         }
 
         if (!secret) {
-            console.log("You don't have secret value in your environment variable for sending request. It is highly recommended to define it first. Variable Name: [MONO_SECRET]");
+            console.log("You don't have secret value in your environment variable for sending request. It is highly recommended to define it first. Variable Name: [DUPSTREAM_SERVICE_SECRET]");
             console.log("This header will sent to your service balancer with X-SECRET header.");
         }
 
@@ -164,4 +164,4 @@ main().then(() => {
 }, (error) => {
     console.error(error);
 });
-app.listen(3000);
+app.listen(8080);

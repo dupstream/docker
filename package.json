@@ -1,11 +1,11 @@
 {
-  "name": "dynamic-upstream",
+  "name": "dupstream-docker",
   "version": "1.0.0",
   "description": "Send your docker swarm service list with containers, nodes, ports to preferred service.",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/monofor/dynamic-upstream-docker.git"
+    "url": "https://github.com/dupstream/docker.git"
   },
   "scripts": {
     "start": "node index.js"

@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t monofor/dynamic-upstream .
+docker build -t dupstream/dupstream .
