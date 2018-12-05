@@ -10,44 +10,44 @@ You can get information when a service added, updated etc. This service will aut
 
 ```json
 {
-    "3bws4d8y2tknhpva8ews8z6gt": {
-        "Name": "nginx",
-        "Ports": [
-            {
-                "TargetPort": 80,
-                "PublishedPort": 9099
-            }
-        ],
-        "Nodes": [
-            {
-                "Id": "xvvpn493yqrvtove74o33o9sf",
-                "Name": "linuxkit-025000000001",
-                "Ip": "192.168.65.3"
-            }
-        ],
-        "Labels": {
-            "mono.upstream.mode": "least_conn"
-        }
-    },
-    "9t2keqva21qk9oj3ufkynkr77": {
-        "Name": "redis",
-        "Ports": [
-            {
-                "TargetPort": 6397,
-                "PublishedPort": 2222
-            }
-        ],
-        "Nodes": [
-            {
-                "Id": "xvvpn493yqrvtove74o33o9sf",
-                "Name": "linuxkit-025000000001",
-                "Ip": "192.168.65.3"
-            }
-        ],
-        "Labels": {
-            "mono.upstream": "ip_hash"
-        }
+index.js:129
+  "nodes": [
+    {
+      "Id": "xvvpn493yqrvtove74o33o9sf",
+      "Name": "linuxkit-025000000001",
+      "Ip": "192.168.65.3"
     }
+  ],
+  "services": [
+    {
+      "Name": "nginx",
+      "Ports": [
+        {
+          "TargetPort": 80,
+          "PublishedPort": 9099
+        }
+      ],
+      "Nodes": [
+        "xvvpn493yqrvtove74o33o9sf"
+      ],
+      "Labels": {
+        "mono.upstream.mode": "least_conn"
+      }
+    },
+    {
+      "Name": "redis",
+      "Ports": [
+        {
+          "TargetPort": 6397,
+          "PublishedPort": 2222
+        }
+      ],
+      "Nodes": [
+        "xvvpn493yqrvtove74o33o9sf"
+      ],
+      "Labels": {}
+    }
+  ]
 }
 ```
 
