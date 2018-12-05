@@ -1,0 +1,19 @@
+{
+  "name": "dynamic-upstream",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/monofor/dynamic-upstream-docker.git"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dockerode": "^2.5.7",
+    "request": "^2.88.0"
+  }
+}

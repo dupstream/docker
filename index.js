@@ -1,0 +1,147 @@
+const http = require("http");
+const Docker = require('dockerode');
+const request = require('request');
+
+const docker = new Docker({
+    socketPath: '/var/run/docker.sock'
+});
+let latestValue = null;
+const TASK_STATES = {
+    RUNNING: "running"
+};
+
+const NODE_STATES = {
+    READY: "ready",
+    ACTIVE: "active"
+};
+
+const isAlways = process.argv.indexOf("--always") !== -1;
+
+const seconds = parseInt((process.env.MONO_PERIOD || 3));
+
+if (isAlways) {
+    console.log(`--always is enabled which means every ${seconds} your service will be informed.`);
+} else {
+    console.log(`Your service will be informed every ${seconds} when something is changed.`);
+}
+
+const serviceUrl = process.env.MONO_SERVICE;
+const secret = process.env.MONO_SECRET;
+
+const app = http.createServer((request, response) => {
+    response.writeHead(200, {
+        "Content-Type": "text/html"
+    });
+    response.write("Nothing to show here!");
+    response.end();
+});
+
+const main = async () => {
+    try {
+        const nodes = await docker.listNodes();
+        let nnodes = {};
+        nodes.map(x => {
+            if (x.Status.State !== NODE_STATES.READY && x.Spec.Availability !== NODE_STATES.ACTIVE)
+                return;
+
+            nnodes[x.ID] = {
+                Id: x.ID,
+                Name: x.Description.Hostname,
+                Ip: x.Status.Addr
+            };
+        });
+
+        const services = await docker.listServices();
+
+        let nservices = {};
+        services.map(x => {
+            if (!x.Spec.Mode.Replicated)
+                return;
+            if (!x.Endpoint.Ports || !x.Endpoint.Ports.length)
+                return;
+
+            nservices[x.ID] = {
+                Name: x.Spec.Name,
+                Ports: x.Endpoint.Ports.map(y => {
+                    return {
+                        TargetPort: y.TargetPort,
+                        PublishedPort: y.PublishedPort
+                    };
+                }),
+                Nodes: [],
+                Labels: x.Spec.Labels
+            };
+        });
+
+        const tasks = await docker.listTasks();
+        tasks.map(x => {
+            if (!nservices[x.ServiceID])
+                return;
+            if (!x.Desiredstate === TASK_STATES.RUNNING || x.Status.State !== TASK_STATES.RUNNING)
+                return;
+
+            let node = nnodes[x.NodeID];
+
+            if (!node) {
+                return;
+            }
+
+            if (!nservices[x.ServiceID].Nodes.find(z => z.Id === node.Id)) {
+                nservices[x.ServiceID].Nodes.push(node);
+            }
+        });
+
+
+        if (!serviceUrl) {
+            console.log("There is no service definition in environment variables. Please define it first. Variable Name: [MONO_SERVICE]");
+            return;
+        }
+
+        let value = JSON.stringify(nservices);
+        if (value !== latestValue || isAlways) {
+            value = JSON.stringify(nservices);
+            console.log("Configuration will be updated.");
+        } else {
+            return;
+        }
+
+        if (!secret) {
+            console.log("You don't have secret value in your environment variable for sending request. It is highly recommended to define it first. Variable Name: [MONO_SECRET]");
+            console.log("This header will sent to your service balancer with X-SECRET header.");
+        }
+
+        latestValue = value;
+
+        console.log(JSON.stringify(nservices, null, 2));
+        console.log(`${Object.keys(nservices).length} services found.`);
+        console.log(`Sending to service : ${serviceUrl}`);
+        request({
+            url: serviceUrl,
+            headers: {
+                'X-SECRET': secret
+            },
+            json: true,
+            method: 'POST',
+            body: nservices
+        }, function (error, response, body) {
+            if (error != null) {
+                latestValue = null;
+                console.log("Something is wrong.");
+                console.error(error);
+                return;
+            }
+
+            if (response.statusCode === 200) {
+                console.log("Service informed");
+                return;
+            }
+
+            console.log(response);
+        });
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+setInterval(main, seconds * 1000);
+app.listen(3000);

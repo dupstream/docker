@@ -1,0 +1,7 @@
+**/node_modules/
+**/README.md
+**/.gitignore
+**/.git
+**/.vscode
+**/.dockerignore
+**/Dockerfile
