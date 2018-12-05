@@ -16,8 +16,10 @@ const NODE_STATES = {
 };
 
 const isAlways = process.argv.indexOf("--always") !== -1;
+const isDebug = process.argv.indexOf("--debug") !== -1;
 
 const seconds = parseInt((process.env.MONO_PERIOD || 3));
+const time = seconds * 1000;
 
 if (isAlways) {
     console.log(`--always is enabled which means every ${seconds} your service will be informed.`);
@@ -112,7 +114,9 @@ const main = async () => {
 
         latestValue = value;
 
-        console.log(JSON.stringify(nservices, null, 2));
+        if (isDebug) {
+            console.log(JSON.stringify(nservices, null, 2));
+        }
         console.log(`${Object.keys(nservices).length} services found.`);
         console.log(`Sending to service : ${serviceUrl}`);
         request({
@@ -129,19 +133,24 @@ const main = async () => {
                 console.log("Something is wrong.");
                 console.error(error);
                 return;
-            }
-
-            if (response.statusCode === 200) {
+            } else if (response.statusCode === 200) {
                 console.log("Service informed");
                 return;
+            } else {
+                console.log(`No success code from server. We will try again in ${seconds} seconds.`);
+                latestValue = null;
+                console.log(body);
             }
-
-            console.log(response);
+            setTimeout(main, time);
         });
     } catch (e) {
         console.error(e);
         throw e;
     }
 }
-setInterval(main, seconds * 1000);
+main().then(() => {
+    setTimeout(main, time);
+}, (error) => {
+    console.error(error);
+});
 app.listen(3000);
