@@ -65,7 +65,7 @@ Your can use following environment variables;
 |DUPSTREAM_SERVICE|`http`|Service type that dupstream will inform.|
 |DUPSTREAM_SERVICE_URL|`null`|The service url like "http://mylb.example.com/update"|
 |DUPSTREAM_SERVICE_SECRET|`null`|Use it and secure your endpoint. This will sent to your server with header "X-SECRET"|
-|DUPSTREAM_PREIOD|`3`|Seconds - will check your services every 3 seconds.|
+|DUPSTREAM_PERIOD|`3`|Seconds - will check your services every 3 seconds.|
 
 and a command like `--always` (Which will help you to ignore caching and send always updated version of your services). Also `--debug` will show you the request body.
 
@@ -80,7 +80,7 @@ docker run -d \
     --name=dupstream \
     -e DUPSTREAM_SERVICE_URL=http://yourwebservice/ \
     -e DUPSTREAM_SERVICE_SECRET=YOUR_ULTIMATE_SECRET_KEY \
-    -e DUPSTREAM_PREIOD=3 \
+    -e DUPSTREAM_PERIOD=3 \
     --volume=/var/run/docker.sock:/var/run/docker.sock \
     dupstream/dupstream:latest
 ```
