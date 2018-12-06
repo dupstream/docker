@@ -61,8 +61,6 @@ const main = async () => {
 
         let nservices = {};
         services.map(x => {
-            if (!x.Spec.Mode.Replicated)
-                return;
             if (!x.Endpoint.Ports || !x.Endpoint.Ports.length)
                 return;
 
