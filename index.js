@@ -23,11 +23,11 @@ const time = seconds * 1000;
 
 if (isAlways) {
   console.log(
-    `--always is enabled which means every ${seconds} your service will be informed.`
+    `--always is enabled which means every ${seconds} seconds your service will be informed.`
   );
 } else {
   console.log(
-    `Your service will be informed every ${seconds} when something is changed.`
+    `Your service will be informed every ${seconds} seconds when something is changed.`
   );
 }
 
@@ -60,7 +60,9 @@ const main = async () => {
       nnodes[x.ID] = {
         Id: x.ID,
         Name: x.Description.Hostname,
-        Ip: x.Status.Addr
+        Ip: x.Status.Addr,
+        State: x.Status.State,
+        Availability: x.Spec.Availability
       };
     });
 
@@ -94,7 +96,11 @@ const main = async () => {
 
       let node = nnodes[x.NodeID];
 
-      if (!node) {
+      if (
+        !node ||
+        node.State !== NODE_STATES.READY ||
+        node.Availability !== NODE_STATES.ACTIVE
+      ) {
         return;
       }
 
