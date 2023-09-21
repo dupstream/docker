@@ -60,12 +60,12 @@ You can get information when a service added, updated etc. This service will aut
 
 Your can use following environment variables;
 
-|Variable|Default|Description|
-|---|---|---|
-|DUPSTREAM_SERVICE|`http`|Service type that dupstream will inform.|
-|DUPSTREAM_SERVICE_URL|`null`|The service url like "http://mylb.example.com/update"|
-|DUPSTREAM_SERVICE_SECRET|`null`|Use it and secure your endpoint. This will sent to your server with header "X-SECRET"|
-|DUPSTREAM_PERIOD|`3`|Seconds - will check your services every 3 seconds.|
+| Variable                 | Default | Description                                                                           |
+| ------------------------ | ------- | ------------------------------------------------------------------------------------- |
+| DUPSTREAM_SERVICE        | `http`  | Service type that dupstream will inform.                                              |
+| DUPSTREAM_SERVICE_URL    | `null`  | The service url like "http://mylb.example.com/update"                                 |
+| DUPSTREAM_SERVICE_SECRET | `null`  | Use it and secure your endpoint. This will sent to your server with header "X-SECRET" |
+| DUPSTREAM_PERIOD         | `3`     | Seconds - will check your services every 3 seconds.                                   |
 
 and a command like `--always` (Which will help you to ignore caching and send always updated version of your services). Also `--debug` will show you the request body.
 
@@ -97,6 +97,12 @@ docker run -d \
 ```
 
 We will also publish combined version with nginx config.
+
+You can also use DUPSTREAM_SERVICE_URL with multiple url by adding "|" as separator. For example;
+
+```sh
+DUPSTREAM_SERVICE_URL=http://your-service-01|http://your-service-02|http://your-service-03
+```
 
 ### Roadmap
 

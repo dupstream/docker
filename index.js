@@ -3,16 +3,16 @@ const Docker = require("dockerode");
 const request = require("request");
 
 const docker = new Docker({
-  socketPath: "/var/run/docker.sock"
+  socketPath: "/var/run/docker.sock",
 });
 let latestValue = null;
 const TASK_STATES = {
-  RUNNING: "running"
+  RUNNING: "running",
 };
 
 const NODE_STATES = {
   READY: "ready",
-  ACTIVE: "active"
+  ACTIVE: "active",
 };
 
 const isAlways = process.argv.indexOf("--always") !== -1;
@@ -31,12 +31,12 @@ if (isAlways) {
   );
 }
 
-const serviceUrl = process.env.DUPSTREAM_SERVICE_URL;
+const servicesUrl = process.env.DUPSTREAM_SERVICE_URL;
 const secret = process.env.DUPSTREAM_SERVICE_SECRET;
 
 const app = http.createServer((request, response) => {
   response.writeHead(200, {
-    "Content-Type": "text/html"
+    "Content-Type": "text/html",
   });
   response.write("Nothing to show here!");
   response.end();
@@ -46,12 +46,12 @@ const main = async () => {
   try {
     let requestValue = {
       nodes: [],
-      services: []
+      services: [],
     };
 
     const nodes = await docker.listNodes();
     let nnodes = {};
-    nodes.map(x => {
+    nodes.map((x) => {
       if (
         x.Status.State !== NODE_STATES.READY &&
         x.Spec.Availability !== NODE_STATES.ACTIVE
@@ -62,31 +62,31 @@ const main = async () => {
         Name: x.Description.Hostname,
         Ip: x.Status.Addr,
         State: x.Status.State,
-        Availability: x.Spec.Availability
+        Availability: x.Spec.Availability,
       };
     });
 
     const services = await docker.listServices();
 
     let nservices = {};
-    services.map(x => {
+    services.map((x) => {
       if (!x.Endpoint.Ports || !x.Endpoint.Ports.length) return;
 
       nservices[x.ID] = {
         Name: x.Spec.Name,
-        Ports: x.Endpoint.Ports.map(y => {
+        Ports: x.Endpoint.Ports.map((y) => {
           return {
             TargetPort: y.TargetPort,
-            PublishedPort: y.PublishedPort
+            PublishedPort: y.PublishedPort,
           };
         }),
         Nodes: [],
-        Labels: x.Spec.Labels
+        Labels: x.Spec.Labels,
       };
     });
 
     const tasks = await docker.listTasks();
-    tasks.map(x => {
+    tasks.map((x) => {
       if (!nservices[x.ServiceID]) return;
       if (
         !x.Desiredstate === TASK_STATES.RUNNING ||
@@ -109,18 +109,18 @@ const main = async () => {
       }
     });
 
-    if (!serviceUrl) {
+    if (!servicesUrl) {
       console.log(
         "There is no service definition in environment variables. Please define it first. Variable Name: [DUPSTREAM_SERVICE_URL]"
       );
       return;
     }
 
-    requestValue.nodes = Object.keys(nnodes).map(n => {
+    requestValue.nodes = Object.keys(nnodes).map((n) => {
       return nnodes[n];
     });
 
-    requestValue.services = Object.keys(nservices).map(s => {
+    requestValue.services = Object.keys(nservices).map((s) => {
       return nservices[s];
     });
 
@@ -147,34 +147,37 @@ const main = async () => {
       console.log(JSON.stringify(requestValue, null, 2));
     }
     console.log(`${Object.keys(nservices).length} services found.`);
-    console.log(`Sending to service : ${serviceUrl}`);
-    request(
-      {
-        url: serviceUrl,
-        headers: {
-          "X-SECRET": secret
+    const allServicesUrls = servicesUrl.split("|");
+    for (const serviceUrl of allServicesUrls) {
+      console.log(`Sending to service : ${serviceUrl}`);
+      request(
+        {
+          url: serviceUrl,
+          headers: {
+            "X-SECRET": secret,
+          },
+          json: true,
+          method: "POST",
+          body: requestValue,
         },
-        json: true,
-        method: "POST",
-        body: requestValue
-      },
-      function(error, response, body) {
-        if (error != null) {
-          latestValue = null;
-          console.log("Something is wrong.");
-          console.error(error);
-        } else if (response.statusCode === 200) {
-          console.log("Service informed");
-        } else {
-          console.log(
-            `No success code from server. We will try again in ${seconds} seconds.`
-          );
-          latestValue = null;
-          console.log(body);
+        function (error, response, body) {
+          if (error != null) {
+            latestValue = null;
+            console.log("Something is wrong.");
+            console.error(error);
+          } else if (response.statusCode === 200) {
+            console.log("Service informed");
+          } else {
+            console.log(
+              `No success code from server. We will try again in ${seconds} seconds.`
+            );
+            latestValue = null;
+            console.log(body);
+          }
+          setTimeout(main, time);
         }
-        setTimeout(main, time);
-      }
-    );
+      );
+    }
   } catch (e) {
     console.error(e);
     throw e;
@@ -184,7 +187,7 @@ main().then(
   () => {
     setTimeout(main, time);
   },
-  error => {
+  (error) => {
     console.error(error);
   }
 );
