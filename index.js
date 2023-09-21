@@ -1,6 +1,6 @@
-const http = require("http");
-const Docker = require("dockerode");
-const request = require("request");
+import http from "http";
+import Docker from "dockerode";
+import got from "got";
 
 const docker = new Docker({
   socketPath: "/var/run/docker.sock",
@@ -148,36 +148,28 @@ const main = async () => {
     }
     console.log(`${Object.keys(nservices).length} services found.`);
     const allServicesUrls = servicesUrl.split("|");
+    console.log(allServicesUrls);
     for (const serviceUrl of allServicesUrls) {
       console.log(`Sending to service : ${serviceUrl}`);
-      request(
-        {
-          url: serviceUrl,
-          headers: {
-            "X-SECRET": secret,
-          },
-          json: true,
-          method: "POST",
-          body: requestValue,
-        },
-        function (error, response, body) {
-          if (error != null) {
-            latestValue = null;
-            console.log("Something is wrong.");
-            console.error(error);
-          } else if (response.statusCode === 200) {
-            console.log("Service informed");
-          } else {
-            console.log(
-              `No success code from server. We will try again in ${seconds} seconds.`
-            );
-            latestValue = null;
-            console.log(body);
-          }
-          setTimeout(main, time);
-        }
-      );
+      try {
+        const result = await got
+          .post(serviceUrl, {
+            headers: {
+              "X-SECRET": secret,
+            },
+            json: JSON.parse(JSON.stringify(requestValue)),
+            timeout: {
+              request: 5000,
+            },
+          })
+          .json();
+        console.log(result);
+      } catch (gotError) {
+        console.log(`Error for ${serviceUrl} Reason: ${gotError.code}`);
+        console.log(JSON.stringify(requestValue), null, 2);
+      }
     }
+    setTimeout(main, time);
   } catch (e) {
     console.error(e);
     throw e;
